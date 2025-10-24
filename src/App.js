@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
 import './App.css';
-import StackedGroupedColumnChart from './StackedGroupedColumnChart';
+import HighchartsPage from './HighchartsPage';
 import RechartsPage from './RechartsPage';
 import LogMonitorDashboard from './LogMonitorDashboard';
 
@@ -75,14 +75,12 @@ function HomePage() {
           </ul>
         </div>
 
-        <div className="chart-section">
-          <h2>📊 Highcharts Stacked and Grouped Column Chart</h2>
-          <StackedGroupedColumnChart />
-        </div>
-
         <div className="navigation-section">
           <h2>🔗 추가 기능</h2>
           <div className="nav-buttons">
+            <Link to="/highcharts" className="nav-button">
+              📊 Highcharts 차트
+            </Link>
             <Link to="/recharts" className="nav-button">
               📈 Recharts 차트
             </Link>
@@ -124,6 +122,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/highcharts" element={<HighchartsPage />} />
         <Route path="/recharts" element={<RechartsPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
       </Routes>
