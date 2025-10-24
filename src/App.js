@@ -4,23 +4,55 @@ import './App.css';
 import HighchartsPage from './HighchartsPage';
 import RechartsPage from './RechartsPage';
 import LogMonitorDashboard from './LogMonitorDashboard';
+import apiService from './services/api';
 
 // 메인 홈페이지 컴포넌트
 function HomePage() {
   const [time, setTime] = useState(new Date());
   const [podInfo, setPodInfo] = useState(null);
+  const [status, setStatus] = useState('loading');
+  const [features, setFeatures] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const timer = setInterval(() => {
       setTime(new Date());
     }, 1000);
 
-    // Kubernetes 환경 정보 시뮬레이션
-    setPodInfo({
-      podName: process.env.REACT_APP_POD_NAME || 'react-app-pod',
-      nodeName: process.env.REACT_APP_NODE_NAME || 'minikube',
-      namespace: process.env.REACT_APP_NAMESPACE || 'default'
-    });
+    // API에서 데이터 가져오기
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const data = await apiService.getMainPageData();
+        
+        setPodInfo(data.podInfo);
+        setStatus(data.status);
+        setFeatures(data.features);
+      } catch (error) {
+        console.error('Failed to fetch main page data:', error);
+        // API 실패 시 기본값 설정
+        setPodInfo({
+          podName: process.env.REACT_APP_POD_NAME || 'react-app-pod',
+          nodeName: process.env.REACT_APP_NODE_NAME || 'minikube',
+          namespace: process.env.REACT_APP_NAMESPACE || 'default'
+        });
+        setStatus('running');
+        setFeatures([
+          '실시간 시계',
+          'Kubernetes 환경 정보',
+          '반응형 디자인',
+          'Docker 컨테이너화',
+          'K8s 배포 준비',
+          'Highcharts 차트',
+          'Recharts 차트',
+          '실시간 로그 모니터링'
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
 
     return () => clearInterval(timer);
   }, []);
@@ -56,23 +88,22 @@ function HomePage() {
         <div className="info-card">
           <h2>상태</h2>
           <div className="status">
-            <span className="status-indicator running"></span>
-            <span>실행 중</span>
+            <span className={`status-indicator ${status}`}></span>
+            <span>{loading ? '로딩 중...' : status === 'running' ? '실행 중' : status}</span>
           </div>
         </div>
 
         <div className="features">
           <h2>주요 기능</h2>
-          <ul>
-            <li>✅ 실시간 시계</li>
-            <li>✅ Kubernetes 환경 정보</li>
-            <li>✅ 반응형 디자인</li>
-            <li>✅ Docker 컨테이너화</li>
-            <li>✅ K8s 배포 준비</li>
-            <li>✅ Highcharts 차트</li>
-            <li>✅ Recharts 차트</li>
-            <li>✅ 실시간 로그 모니터링</li>
-          </ul>
+          {loading ? (
+            <div className="loading">로딩 중...</div>
+          ) : (
+            <ul>
+              {features.map((feature, index) => (
+                <li key={index}>✅ {feature}</li>
+              ))}
+            </ul>
+          )}
         </div>
 
         <div className="navigation-section">

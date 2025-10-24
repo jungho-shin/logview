@@ -2,7 +2,33 @@ import React from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
-const StackedGroupedColumnChart = () => {
+const StackedGroupedColumnChart = ({ data }) => {
+  // API 데이터가 있으면 사용, 없으면 기본 데이터 사용
+  const series = data?.series || [
+    {
+      name: 'John',
+      data: [5, 3, 4, 7, 2, 3, 4, 5, 6, 7, 8, 9],
+      stack: 'male'
+    },
+    {
+      name: 'Joe',
+      data: [3, 4, 4, 2, 5, 6, 7, 8, 9, 10, 11, 12],
+      stack: 'male'
+    },
+    {
+      name: 'Jane',
+      data: [2, 5, 6, 2, 1, 2, 3, 4, 5, 6, 7, 8],
+      stack: 'female'
+    },
+    {
+      name: 'Janet',
+      data: [3, 0, 4, 4, 2, 3, 4, 5, 6, 7, 8, 9],
+      stack: 'female'
+    }
+  ];
+
+  const categories = data?.categories || ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
   const options = {
     chart: {
       type: 'column'
@@ -18,7 +44,7 @@ const StackedGroupedColumnChart = () => {
       text: 'Highcharts React 샘플 - 스택 및 그룹 컬럼 차트'
     },
     xAxis: {
-      categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+      categories: categories
     },
     yAxis: {
       min: 0,
@@ -56,28 +82,7 @@ const StackedGroupedColumnChart = () => {
         }
       }
     },
-    series: [
-      {
-        name: 'John',
-        data: [5, 3, 4, 7, 2, 3, 4, 5, 6, 7, 8, 9],
-        stack: 'male'
-      },
-      {
-        name: 'Joe',
-        data: [3, 4, 4, 2, 5, 6, 7, 8, 9, 10, 11, 12],
-        stack: 'male'
-      },
-      {
-        name: 'Jane',
-        data: [2, 5, 6, 2, 1, 2, 3, 4, 5, 6, 7, 8],
-        stack: 'female'
-      },
-      {
-        name: 'Janet',
-        data: [3, 0, 4, 4, 2, 3, 4, 5, 6, 7, 8, 9],
-        stack: 'female'
-      }
-    ],
+    series: series,
     responsive: {
       rules: [{
         condition: {

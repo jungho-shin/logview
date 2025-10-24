@@ -1,9 +1,31 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import RechartsStackedGroupedColumnChart from './RechartsStackedGroupedColumnChart';
+import apiService from './services/api';
 
 function RechartsPage() {
   const navigate = useNavigate();
+  const [chartData, setChartData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchChartData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await apiService.getRechartsData();
+        setChartData(data);
+      } catch (err) {
+        console.error('Failed to fetch Recharts data:', err);
+        setError('차트 데이터를 불러오는데 실패했습니다.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchChartData();
+  }, []);
 
   return (
     <div className="App">
@@ -20,7 +42,13 @@ function RechartsPage() {
         
         <div className="chart-section">
           <h2>📈 Recharts Stacked and Grouped Column Chart</h2>
-          <RechartsStackedGroupedColumnChart />
+          {loading ? (
+            <div className="loading">차트 데이터를 불러오는 중...</div>
+          ) : error ? (
+            <div className="error">{error}</div>
+          ) : (
+            <RechartsStackedGroupedColumnChart data={chartData} />
+          )}
         </div>
       </header>
     </div>

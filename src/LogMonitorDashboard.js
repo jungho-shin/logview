@@ -9,6 +9,7 @@ import {
   ResponsiveContainer,
   Cell
 } from 'recharts';
+import apiService from './services/api';
 
 const LogMonitorDashboard = () => {
   const [autoRefresh, setAutoRefresh] = useState(true);
@@ -18,71 +19,34 @@ const LogMonitorDashboard = () => {
     hello: [],
     airflow: []
   });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // 샘플 데이터 생성
-  const generateSampleData = () => {
-    const data = [];
-    const today = new Date();
-    
-    for (let i = 29; i >= 0; i--) {
-      const date = new Date(today);
-      date.setDate(date.getDate() - i);
-      
-      data.push({
-        date: date.toISOString().split('T')[0],
-        displayDate: date.toLocaleDateString('en-US', { 
-          month: 'short', 
-          day: '2-digit', 
-          hour: '2-digit', 
-          minute: '2-digit' 
-        }).replace(',', ''),
-        duration: Math.random() * 11, // 0-11초 사이의 랜덤 값
-        timestamp: date.getTime()
-      });
+  // API에서 데이터 가져오기
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await apiService.getLogMonitorData();
+      setChartData(data.chartData);
+      setStatusData(data.statusData);
+    } catch (err) {
+      console.error('Failed to fetch log monitor data:', err);
+      setError('데이터를 불러오는데 실패했습니다.');
+    } finally {
+      setLoading(false);
     }
-    
-    return data;
-  };
-
-  // 상태 인디케이터 데이터 생성
-  const generateStatusData = () => {
-    const helloStatus = [];
-    const airflowStatus = [];
-    
-    for (let i = 0; i < 30; i++) {
-      // hello: 대부분 성공 (dark green), 일부 하이라이트 (light blue)
-      const helloValue = Math.random();
-      if (helloValue > 0.9) {
-        helloStatus.push({ status: 'highlight', index: i });
-      } else {
-        helloStatus.push({ status: 'success', index: i });
-      }
-      
-      // airflow: 대부분 성공, 일부 회색, 마지막에 빈 상태
-      const airflowValue = Math.random();
-      if (i === 29) {
-        airflowStatus.push({ status: 'empty', index: i });
-      } else if (airflowValue > 0.8) {
-        airflowStatus.push({ status: 'pending', index: i });
-      } else {
-        airflowStatus.push({ status: 'success', index: i });
-      }
-    }
-    
-    return { hello: helloStatus, airflow: airflowStatus };
   };
 
   useEffect(() => {
-    setChartData(generateSampleData());
-    setStatusData(generateStatusData());
+    fetchData();
   }, []);
 
   useEffect(() => {
     let interval;
     if (autoRefresh) {
       interval = setInterval(() => {
-        setChartData(generateSampleData());
-        setStatusData(generateStatusData());
+        fetchData();
       }, 5000); // 5초마다 업데이트
     }
     
@@ -115,6 +79,44 @@ const LogMonitorDashboard = () => {
       default: return '#228B22';
     }
   };
+
+  if (loading) {
+    return (
+      <div style={{ 
+        width: '100%', 
+        height: '600px', 
+        margin: '20px 0',
+        backgroundColor: '#f8f9fa',
+        borderRadius: '8px',
+        padding: '20px',
+        boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div className="loading">데이터를 불러오는 중...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{ 
+        width: '100%', 
+        height: '600px', 
+        margin: '20px 0',
+        backgroundColor: '#f8f9fa',
+        borderRadius: '8px',
+        padding: '20px',
+        boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div className="error">{error}</div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ 

@@ -11,9 +11,9 @@ import {
   Cell
 } from 'recharts';
 
-const RechartsStackedGroupedColumnChart = () => {
-  // Highcharts와 동일한 데이터 구조로 변환
-  const data = [
+const RechartsStackedGroupedColumnChart = ({ data }) => {
+  // API 데이터가 있으면 사용, 없으면 기본 데이터 사용
+  const chartData = data || [
     { month: 'Jan', John: 5, Joe: 3, Jane: 2, Janet: 3 },
     { month: 'Feb', John: 3, Joe: 4, Jane: 5, Janet: 0 },
     { month: 'Mar', John: 4, Joe: 4, Jane: 6, Janet: 4 },
@@ -43,7 +43,7 @@ const RechartsStackedGroupedColumnChart = () => {
       </h3>
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart
-          data={data}
+          data={chartData}
           margin={{
             top: 20,
             right: 30,
