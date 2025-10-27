@@ -138,16 +138,16 @@ class ApiService {
   }
 
   // 로그 모니터링 대시보드 데이터
-  async getLogMonitorData() {
+  async getLogMonitorData(dataCount = 5) {
     try {
-      return await this.get('/monitor/logs');
+      return await this.get(`/monitor/logs?count=${dataCount}`);
     } catch (error) {
       // API 실패 시 기본 데이터 반환
-      const generateSampleData = () => {
+      const generateSampleData = (count = 5) => {
         const data = [];
         const today = new Date();
         
-        for (let i = 29; i >= 0; i--) {
+        for (let i = count - 1; i >= 0; i--) {
           const date = new Date(today);
           date.setDate(date.getDate() - i);
           
@@ -167,11 +167,11 @@ class ApiService {
         return data;
       };
 
-      const generateStatusData = () => {
+      const generateStatusData = (count = 5) => {
         const helloStatus = [];
         const airflowStatus = [];
         
-        for (let i = 0; i < 30; i++) {
+        for (let i = 0; i < count; i++) {
           const helloValue = Math.random();
           if (helloValue > 0.9) {
             helloStatus.push({ status: 'highlight', index: i });
@@ -180,7 +180,7 @@ class ApiService {
           }
           
           const airflowValue = Math.random();
-          if (i === 29) {
+          if (i === count - 1) {
             airflowStatus.push({ status: 'empty', index: i });
           } else if (airflowValue > 0.8) {
             airflowStatus.push({ status: 'pending', index: i });
@@ -193,8 +193,8 @@ class ApiService {
       };
 
       return {
-        chartData: generateSampleData(),
-        statusData: generateStatusData()
+        chartData: generateSampleData(dataCount),
+        statusData: generateStatusData(dataCount)
       };
     }
   }

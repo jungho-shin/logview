@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   BarChart,
   Bar,
@@ -14,6 +14,7 @@ import apiService from './services/api';
 const LogMonitorDashboard = () => {
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [selectedItem, setSelectedItem] = useState('hello');
+  const [dataCount, setDataCount] = useState(5); // 기본값 5
   const [chartData, setChartData] = useState([]);
   const [statusData, setStatusData] = useState({
     hello: [],
@@ -23,24 +24,26 @@ const LogMonitorDashboard = () => {
   const [error, setError] = useState(null);
 
   // API에서 데이터 가져오기
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await apiService.getLogMonitorData();
+      console.log(`📊 데이터 개수 ${dataCount}개로 로딩 시작`);
+      const data = await apiService.getLogMonitorData(dataCount);
       setChartData(data.chartData);
       setStatusData(data.statusData);
+      console.log(`✅ 데이터 개수 ${dataCount}개 로딩 완료`);
     } catch (err) {
       console.error('Failed to fetch log monitor data:', err);
       setError('데이터를 불러오는데 실패했습니다.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [dataCount]);
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [fetchData]); // fetchData가 변경될 때마다 데이터 다시 가져오기
 
   useEffect(() => {
     let interval;
@@ -53,7 +56,7 @@ const LogMonitorDashboard = () => {
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [autoRefresh]);
+  }, [autoRefresh, fetchData]); // fetchData도 의존성에 추가
 
   const getBarColor = (entry, index) => {
     if (selectedItem === 'hello') {
@@ -177,17 +180,32 @@ const LogMonitorDashboard = () => {
           </label>
         </div>
         
-        <button style={{
-          background: 'none',
-          border: '1px solid #dee2e6',
-          borderRadius: '4px',
-          padding: '6px 12px',
-          cursor: 'pointer',
-          fontSize: '12px',
-          color: '#666'
-        }}>
-          ⋯ →
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '14px', fontWeight: '500' }}>데이터 개수:</span>
+          <select
+            value={dataCount}
+            onChange={(e) => {
+              const newCount = parseInt(e.target.value);
+              console.log(`🔄 데이터 개수 변경: ${dataCount} → ${newCount}`);
+              setDataCount(newCount);
+            }}
+            style={{
+              padding: '6px 12px',
+              border: '1px solid #dee2e6',
+              borderRadius: '4px',
+              fontSize: '14px',
+              backgroundColor: 'white',
+              cursor: 'pointer',
+              outline: 'none'
+            }}
+          >
+            <option value={5}>5</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+            <option value={365}>365</option>
+          </select>
+        </div>
       </div>
 
       {/* 메인 차트 */}
