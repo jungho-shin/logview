@@ -137,6 +137,62 @@ class ApiService {
     }
   }
 
+  // DAG 목록 가져오기
+  async getDagList() {
+    try {
+      return await this.get('/dags');
+    } catch (error) {
+      // API 실패 시 기본 데이터 반환
+      return [
+        {
+          id: 'hello',
+          name: 'hello',
+          description: 'Hello DAG - 간단한 테스트 워크플로우',
+          status: 'running',
+          owner: 'admin',
+          schedule: '@daily',
+          tasks: 3
+        },
+        {
+          id: 'airflow',
+          name: 'airflow',
+          description: 'Airflow DAG - 데이터 파이프라인 워크플로우',
+          status: 'running',
+          owner: 'admin',
+          schedule: '@hourly',
+          tasks: 5
+        },
+        {
+          id: 'data_processing',
+          name: 'data_processing',
+          description: '데이터 처리 파이프라인',
+          status: 'paused',
+          owner: 'data_team',
+          schedule: '0 2 * * *',
+          tasks: 8
+        },
+        {
+          id: 'etl_pipeline',
+          name: 'etl_pipeline',
+          description: 'ETL 파이프라인 - 추출, 변환, 로드',
+          status: 'running',
+          owner: 'etl_team',
+          schedule: '0 */6 * * *',
+          tasks: 12
+        },
+        {
+          id: 'report_generation',
+          name: 'report_generation',
+          description: '일일 리포트 생성 워크플로우',
+          status: 'running',
+          owner: 'report_team',
+          schedule: '0 9 * * 1-5',
+          tasks: 6
+        }
+      ];
+    }
+  }
+
   // 로그 모니터링 대시보드 데이터
   async getLogMonitorData(dataCount = 5) {
     try {

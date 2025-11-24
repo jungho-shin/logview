@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   BarChart,
   Bar,
@@ -11,9 +12,10 @@ import {
 } from 'recharts';
 import apiService from './services/api';
 
-const LogMonitorDashboard = () => {
-  const [autoRefresh, setAutoRefresh] = useState(true);
-  const [selectedItem, setSelectedItem] = useState('hello');
+const LogMonitorDashboard = ({ selectedDag }) => {
+  const navigate = useNavigate();
+  const [autoRefresh, setAutoRefresh] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(selectedDag || 'hello');
   const [dataCount, setDataCount] = useState(5); // 기본값 5
   const [chartData, setChartData] = useState([]);
   const [statusData, setStatusData] = useState({
@@ -44,6 +46,13 @@ const LogMonitorDashboard = () => {
   useEffect(() => {
     fetchData();
   }, [fetchData]); // fetchData가 변경될 때마다 데이터 다시 가져오기
+
+  // selectedDag prop이 변경될 때 selectedItem 업데이트
+  useEffect(() => {
+    if (selectedDag) {
+      setSelectedItem(selectedDag);
+    }
+  }, [selectedDag]);
 
   useEffect(() => {
     let interval;
@@ -243,12 +252,32 @@ const LogMonitorDashboard = () => {
                 boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
                 fontSize: '12px'
               }}
-              formatter={(value) => [formatDuration(value), 'Duration']}
-              labelFormatter={(label) => `Date: ${label}`}
+              c={(value, name, props) => [
+                `${props.payload.displayDate}\n${formatDuration(value)}`, 
+                'Duration'
+              ]}
+              labelFormatter={() => ''}
             />
-            <Bar dataKey="duration" radius={[2, 2, 0, 0]}>
+            <Bar 
+              dataKey="duration" 
+              radius={[2, 2, 0, 0]}
+              onClick={(data, index) => {
+                if (data && data.displayDate) {
+                  const params = new URLSearchParams({
+                    date: data.displayDate,
+                    duration: data.duration.toString(),
+                    dag: selectedItem
+                  });
+                  navigate(`/recharts?${params.toString()}`);
+                }
+              }}
+            >
               {chartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={getBarColor(entry, index)} />
+                <Cell 
+                  key={`cell-${index}`} 
+                  fill={getBarColor(entry, index)}
+                  style={{ cursor: 'pointer' }}
+                />
               ))}
             </Bar>
           </BarChart>
